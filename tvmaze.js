@@ -50,15 +50,19 @@ function populateShows(shows) {
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
              <div><small>${show.summary}</small></div>
-             <button class="btn btn-outline-light btn-sm Show-getEpisodes">
-               Episodes
-             </button>
+             
+               <a href= "#episodes-area" class="btn btn-outline-light btn-sm Show-getEpisodes">
+               Show Complete List of Episodes
+               </a>
+             
            </div>
          </div>  
        </div>
       `);
 
-    $showsList.append($show);  }
+    $showsList.append($show);  
+    $episodesArea.show();
+  }
 }
 
 
@@ -85,6 +89,7 @@ $searchForm.on("submit", async function (evt) {
  */
 
 async function getEpisodesOfShow(id) {
+ 
   const response = await axios.get(`https://api.tvmaze.com/shows/${id}/episodes`);
   const episodes = [];
   for(let e of response.data){
