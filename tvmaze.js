@@ -1,6 +1,7 @@
 "use strict";
-
+const MISSING_IMAGE_URL = "https://tinyurl.com/tv-missing";
 const $showsList = $("#shows-list");
+const $episodesList = $("#episodes-list");
 const $episodesArea = $("#episodes-area");
 const $searchForm = $("#search-form");
 
@@ -25,7 +26,7 @@ async function getShowsByTerm(term) {
         id: show.show.id,
         name: show.show.name,
         summary: show.show.summary,
-        image: show.show.image.original
+        image: show.show.image ? show.show.image.medium : MISSING_IMAGE_URL
       });
     }
   }catch{console.log("something went wrong")}
@@ -44,12 +45,12 @@ function populateShows(shows) {
          <div class="media">
            <img 
               src="${show.image}" 
-              alt="Bletchly Circle San Francisco" 
+              alt="${show.image}" 
               class="w-25 mr-3">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
              <div><small>${show.summary}</small></div>
-             <button class="btn btn-outline-dark btn-sm Show-getEpisodes">
+             <button class="btn btn-outline-light btn-sm Show-getEpisodes">
                Episodes
              </button>
            </div>
@@ -83,8 +84,46 @@ $searchForm.on("submit", async function (evt) {
  *      { id, name, season, number }
  */
 
-// async function getEpisodesOfShow(id) { }
+async function getEpisodesOfShow(id) {
+  const response = await axios.get(`http://api.tvmaze.com/shows/${id}/episodes`);
+  const episodes = [];
+  for(let e of response.data){
+    
+    episodes.push({
+      id: e.id,
+      name: e.name,
+      season: e.season,
+      number: e.number
+    });
+  }
+  return episodes;
+}
 
-/** Write a clear docstring for this function... */
+function populateEpisodes(episodes) {
+  $episodesList.empty();
 
-// function populateEpisodes(episodes) { }
+  for (let episode of episodes) {
+    const $item = $(
+        `<li>
+         ${episode.name}
+         (season ${episode.season}, episode ${episode.number})
+       </li>
+      `);
+
+    $episodesList.append($item);
+  }
+
+  $episodesArea.show();
+}
+
+
+async function getEpisodesAndDisplay(evt) {
+ 
+  const showId = $(evt.target).closest(".Show").data("show-id");
+
+  const episodes = await getEpisodesOfShow(showId);
+  console.log(episodes);
+  populateEpisodes(episodes);
+}
+
+$showsList.on("click", ".Show-getEpisodes", getEpisodesAndDisplay);
