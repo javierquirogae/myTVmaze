@@ -4,6 +4,7 @@ const $showsList = $("#shows-list");
 const $episodesList = $("#episodes-list");
 const $episodesArea = $("#episodes-area");
 const $searchForm = $("#search-form");
+const $h2 = $("h2");
 
 
 /** Given a search term, search for tv shows that match that query.
@@ -61,8 +62,8 @@ function populateShows(shows) {
       `);
 
     $showsList.append($show);  
-    $episodesArea.show();
   }
+  
 }
 
 
@@ -91,16 +92,20 @@ $searchForm.on("submit", async function (evt) {
 async function getEpisodesOfShow(id) {
  
   const response = await axios.get(`https://api.tvmaze.com/shows/${id}/episodes`);
+  const response2 = await axios.get(`https://api.tvmaze.com/shows/${id}`);
+  console.log(response2.data.name);
   const episodes = [];
   for(let e of response.data){
     
     episodes.push({
+      showName: response2.data.name,
       id: e.id,
       name: e.name,
       season: e.season,
       number: e.number
     });
   }
+  console.log(episodes);
   return episodes;
 }
 
@@ -117,7 +122,7 @@ function populateEpisodes(episodes) {
 
     $episodesList.append($item);
   }
-
+  $h2.text(`${episodes[0].showName} Episodes`);
   $episodesArea.show();
 }
 
@@ -131,4 +136,4 @@ async function getEpisodesAndDisplay(evt) {
   populateEpisodes(episodes);
 }
 
-$showsList.on("click", ".Show-getEpisodes", getEpisodesAndDisplay);
+$showsList.on("mouseenter", ".Show-getEpisodes", getEpisodesAndDisplay);
